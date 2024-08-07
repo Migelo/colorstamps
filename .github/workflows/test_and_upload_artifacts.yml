@@ -32,9 +32,9 @@ jobs:
   
     - name: Convert Notebooks to Python Scripts
       run: |
-        mkdir -p scripts
+        mkdir -p test
         for notebook in examples/*.ipynb; do
-          jupyter nbconvert --to script "$notebook" --output "$(basename "$notebook")"
+          jupyter nbconvert --to script "$notebook" --output-dir=test
         done
 
     - name: Build package
@@ -43,13 +43,16 @@ jobs:
 
     - name: Run tests
       run: |
-        for script in examples/*.py; do
-          python "$script"
+        mkdir -p test/figs
+        cd test
+        for script in ./*.py; do
+          python "$script" 
         done
+        mv *.png figs/
 
     - name: Upload test/figs as artifacts
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: test-figures
-        path: test/figs/*  # Adjust the path to your needs
+        path: test/figs/*
